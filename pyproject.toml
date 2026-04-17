@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tpo-torch"
+version = "0.1.0"
+description = "Target Policy Optimization Library - the stable alternative to PPO/GRPO."
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "torch>=2.0.0",
+    "transformers>=4.40.0",
+    "datasets>=2.14.0",
+    "accelerate>=0.27.0",
+    "peft>=0.10.0"
+]
+
+[tool.setuptools.packages.find]
+include = ["tpo_torch*"]
+exclude = ["notebooks*", "examples*", "tests*"]
