@@ -1,23 +1,29 @@
 # TPO-Torch 🎯
 
-![TPO vs PPO Gradient Stability Profiles](./tpo_vs_ppo_stability.png)
+Target Policy Optimization (TPO) - An experimental RLHF implementation using cross-entropy with advantage-weighted target distributions.
 
-Target Policy Optimization (TPO) is a mathematically stable, consumer-friendly alternative to standard RLHF (like PPO and GRPO). 
+## ⚠️ Important Caveats
 
-While traditional Proximal Policy Optimization (PPO) struggles with volatile learning rates, collapsing gradients, and extreme sensitivity to reward sparsity, **TPO-Torch** implements the cross-entropy advantage distribution model. This forces the model to mimic an implicitly calculated optimal target policy, strictly avoiding KL-divergence blowouts.
+- **NOT peer-reviewed** - No academic paper or published benchmarks
+- **Unverified claims** - Stability/performance vs PPO has NOT been independently validated
+- **Experimental** - Use at your own risk for research purposes
 
-## Philosophy
-*   **Frictionless UX:** 1-line installation, 3-lines of code to train.
-*   **No Hyperbole:**  It just stabilizes local open-weights reasoning alignment on single-GPU hardware.
-*   **Pure PyTorch:** Completely un-bloated. It uses familiar Hugging Face `Trainer` concepts. No exotic dependencies.
+## What is TPO?
+
+TPO is a training method that computes target probabilities for tokens based on reference policy + advantage signals, then uses cross-entropy loss to fit the policy toward those targets.
+
+```python
+target_prob = sigmoid(log_odds(P_ref) + advantage/beta)
+loss = -target_prob * log P_policy(token)
+```
 
 ## Installation
+
 ```bash
 pip install tpo-torch
 ```
 
-## Quick Start (The 3-Line Setup)
-TPO-Torch behaves exactly like `trl`'s standard SFTTrainer, handling data collation and reward-mapping automatically.
+## Quick Start
 
 ```python
 from tpo_torch import TPOTrainer
@@ -26,31 +32,47 @@ from transformers import AutoModelForCausalLM
 model = AutoModelForCausalLM.from_pretrained("Qwen/Qwen2.5-Coder-3B")
 ref_model = AutoModelForCausalLM.from_pretrained("Qwen/Qwen2.5-Coder-3B")
 
-# Standard inputs + 'advantages' column required in your dataset
 trainer = TPOTrainer(
     model=model,
     ref_model=ref_model,
-    beta=0.1, # The KL penalty and target-dist temperature
+    beta=0.1,
     train_dataset=my_rewarded_dataset,
 )
 
 trainer.train()
 ```
 
-## Universal TPO Engine
-TPO-Torch uses a mathematically robust, point-wise distribution shift. Instead of shifting the entire vocabulary (which is unstable and often cancels out), we calculate the ideal target probability for the specific tokens in your dataset.
-
-1. **Target Construction**: Computes the ideal probability for each word based on $P_{ref}$ and the standardized $Advantage$.
-2. **Fitting**: Minimizes the Cross-Entropy between the model and that ideal target.
-3. **Stability**: This method ensures that even with a single GPU and sparse rewards, your model weights move predictably toward high-reward outcomes.
+**Requirements:**
+- `advantages` column in your dataset (float: higher = better response)
+- Reference model (frozen) for computing baseline distributions
 
 ## Core Features
-- ✅ **PEFT/LoRA Ready**: Seamlessly wrap your 24GB VRAM cards using standard `peft` integration.
-- ✅ **1-Click Trainer**: Includes a battle-tested Google Colab template for fine-tuning on free T4s.
-- ✅ **Auto-Labeling**: Automatically detects completion boundaries if you don't provide explicit token labels.
-- ✅ **Sequence & Token Advantage**: Supports both global sentence rewards and per-word advantage signals.
+
+- PEFT/LoRA support via `peft` package
+- Integrates with HuggingFace Trainer
+- Sequence-level and token-level advantages
+- Custom data collator that preserves advantages
+
+## Verification Status
+
+| Component | Status |
+|-----------|--------|
+| Loss function computes | ✅ Verified |
+| Gradients flow | ✅ Verified |
+| Trainer integration | ✅ Verified |
+| Beats PPO stability | ❌ Unverified |
+| Benchmarks | ❌ Not provided |
 
 ## Roadmap
-- [ ] Visual benchmarks on the UltraFeedback dataset vs standard PPO limits.
-- [ ] Integrated support for multi-GPU "GRPO-style" group relative normalization.
-- [ ] Direct export to GGUF for local inference.
+
+- [ ] Independent benchmarks vs PPO/GRPO
+- [ ] Peer review or academic citation
+- [ ] Multi-GPU support
+
+## License
+
+MIT
+
+## Disclaimer
+
+This is a research implementation. No guarantees about performance compared to PPO, GRPO, or other established RLHF methods. The "stability" claims are theoretical/hypothetical, not empirically validated.

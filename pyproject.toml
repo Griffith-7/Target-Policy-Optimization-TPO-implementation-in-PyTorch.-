@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "tpo-torch"
 version = "0.1.0"
-description = "Target Policy Optimization Library - the stable alternative to PPO/GRPO."
+description = "Target Policy Optimization Library - experimental RLHF implementation"
 readme = "README.md"
 requires-python = ">=3.8"
 dependencies = [
