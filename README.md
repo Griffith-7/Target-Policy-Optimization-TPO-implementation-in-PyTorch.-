@@ -8,7 +8,7 @@ While traditional Proximal Policy Optimization (PPO) struggles with volatile lea
 
 ## Philosophy
 *   **Frictionless UX:** 1-line installation, 3-lines of code to train.
-*   **No Hyperbole:** This won't reach AGI. It just stabilizes local open-weights reasoning alignment on single-GPU hardware.
+*   **No Hyperbole:**  It just stabilizes local open-weights reasoning alignment on single-GPU hardware.
 *   **Pure PyTorch:** Completely un-bloated. It uses familiar Hugging Face `Trainer` concepts. No exotic dependencies.
 
 ## Installation
